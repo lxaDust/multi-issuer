@@ -1542,19 +1542,30 @@ BOOL PFC::member(const GT& z)
 	return FALSE;
 }
 
+#include <chrono>
+#include <iostream>
+
 GT PFC::pairing(const G2& x,const G1& y)
 {
+    auto start = std::chrono::high_resolution_clock::now();
 	GT z;
 	z=miller_loop(x,y);
 	z=final_exp(z);
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> duration = end - start;
+    std::cout << " -> [Performance] 配对运算(pairing)耗时: " << duration.count() << " ms\n";
 	return z;
 }
 
 GT PFC::multi_pairing(int n,G2 **y,G1 **x)
 {
+    auto start = std::chrono::high_resolution_clock::now();
 	GT z;
 	z=multi_miller(n,y,x);
 	z=final_exp(z);
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> duration = end - start;
+    std::cout << " -> [Performance] 多重配对运算(multi_pairing)耗时: " << duration.count() << " ms\n";
 	return z;
 
 }
