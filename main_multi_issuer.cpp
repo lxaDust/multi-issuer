@@ -17,8 +17,13 @@ int main() {
         G1 G1_gen;
         pfc.random(G1_gen); // G1 上的全局基点
         
-        int num_messages = 2; 
-        vector<Big> messages = {Big(12345), Big(67890)}; // 用户的一些属性信息
+        int num_messages;
+        cout << "请输入消息/属性的数量(num_messages): ";
+        cin >> num_messages;
+        vector<Big> messages;
+        for (int i = 0; i < num_messages; i++) {
+            messages.push_back(Big(12345 + i)); // 用户的一些属性信息自动模拟生成
+        }
         
         cout << "=== PS 多签发方协作签发证书实验演示 ===" << endl;
         
@@ -35,7 +40,9 @@ int main() {
         cout << "  -> 【要求满足】签名发起方为虚拟用户 dm 生成 dm 的密钥对..." << endl;
         KeyPair kp_dm = generateKeyPair(num_messages, &pfc, G2_gen); 
         
-        int num_other_issuers = 3;
+        int num_other_issuers;
+        cout << "请输入其他合作签发方的数量(num_other_issuers): ";
+        cin >> num_other_issuers;
         cout << "  -> " << num_other_issuers << " 个其他合作签发方生成各自的密钥对..." << endl;
         
         vector<KeyPair> other_issuers_kps;

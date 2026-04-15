@@ -1,0 +1,9 @@
+git add .
+git commit -m "这里填写你修改了什么的描述"
+git push
+
+
+运行命令:
+g++ -o main_multi_issuer main_multi_issuer.cpp multi_issuer.cpp trusted_authority.cpp nizk_proof.cpp or_proof.cpp Algorithm/bn_pair.cpp Algorithm/miracl.a -w -O2
+
+./main_multi_issuer
