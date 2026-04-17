@@ -133,7 +133,7 @@ int main() {
             return -1; // 终止执行
         }
 
-        cout << "\n[13] 第三方验证者验证盲化后的凭证..." << endl;
+        cout << "\n[13] 第三方验证者验证盲化后的TA凭证..." << endl;
         bool ta_verify_valid = verifyRandomizedCredential(ta_kp.pk, rand_cred, &pfc, G1_gen);
         if (ta_verify_valid) {
             cout << "  -> 【TA签名盲化验证成功！】验证者仅通过一次验证等式，确定了凭证来自合法的TA并属于合法用户。" << endl;
@@ -151,7 +151,7 @@ int main() {
 
         cout << "\n[15] 用户基于已有的多重PS凭证生成 OR-Proof..." << endl;
         PresentationPayload or_payload = generatePresentationPayload(apk, aggregated_sig, messages, pk_U, verifier_kp.pk_V, &pfc, G1_gen, G2_gen);
-        cout << "  -> 用户生成了包括 c_left, T_left 乃至盲化后凭证的大礼包发送给验证者。" << endl;
+        cout << "  -> 用户生成了包括 c_left, T_left 以及盲化后凭证的数据包发送给验证者。" << endl;
         
         cout << "\n[16] 验证者验证 OR-Proof 及盲化凭证..." << endl;
         bool or_proof_valid = verifyORProof(or_payload, &pfc, G1_gen, G2_gen);

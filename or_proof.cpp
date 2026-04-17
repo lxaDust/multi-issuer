@@ -25,7 +25,7 @@ BlindedCredential blindCredential(const AggregatedPK& apk, const SigShare& sig, 
     return bc;
 }
 
-// --- 生成发送给验证者的大礼包 ---
+// --- 生成发送给验证者的数据包 ---
 PresentationPayload generatePresentationPayload(
     const AggregatedPK& apk, 
     const SigShare& sig, 
@@ -89,7 +89,7 @@ PresentationPayload generatePresentationPayload(
     return payload;
 }
 
-// --- 验证方检查大礼包 ---
+// --- 验证方检查数据包 ---
 bool verifyORProof(const PresentationPayload& payload, PFC* pfc, const G1& g, const G2& g_tilde) {
     const ORProof& proof = payload.proof;
     
@@ -135,7 +135,7 @@ bool verifyORProof(const PresentationPayload& payload, PFC* pfc, const G1& g, co
     return true;
 }
 
-// --- 验证者利用私钥伪造大礼包 (可否认性) ---
+// --- 验证者利用私钥伪造数据包 (可否认性) ---
 PresentationPayload simulatePresentationPayloadByVerifier(
     const VerifierKeyPair& kp_V,
     const G2& pk_U,
