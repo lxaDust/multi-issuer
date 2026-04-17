@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <sstream>
 #include "Algorithm/pairing_3.h"
 #include "multi_issuer.h"
 #include "trusted_authority.h"
@@ -27,9 +28,14 @@ int main() {
         
         cout << "=== PS 多签发方协作签发证书实验演示 ===" << endl;
         
-        // 将用户信息哈希到 G1 上的点 h (由于演示目的，直接在群上随机取点模拟哈希过程)
+        // 将用户信息哈希到 G1 上的点 h (正式的哈希过程)
         G1 h;
-        pfc.random(h);
+        stringstream ss;
+        for (int i = 0; i < num_messages; i++) {
+            ss << messages[i];
+        }
+        string user_info = ss.str();
+        pfc.hash_and_map(h, (char *)user_info.c_str());
         cout << "-> 用户生成其属性信息的哈希点 h (在群 G1 上)" << endl;
         
         cout << "\n[1] 各方生成各自的密钥对..." << endl;
