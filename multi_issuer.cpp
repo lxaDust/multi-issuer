@@ -1,4 +1,6 @@
 #include "multi_issuer.h"
+#include <chrono>
+#include <iostream>
 
 // --- 生成密钥对 ---
 KeyPair generateKeyPair(int num_messages, PFC* pfc, const G2& G2_gen) {
@@ -69,6 +71,8 @@ AggregatedPK aggregatePublicKeys(const vector<KeyPair>& kps, int num_messages) {
 
 // --- 验证聚合签名 ---
 bool verifySignature(const AggregatedPK& apk, const SigShare& aggregated_sig, const vector<Big>& messages, const G2& G2_gen, PFC* pfc) {
+    auto start_time = std::chrono::high_resolution_clock::now();
+
     G2 right_pub = apk.X_agg;
     for (size_t i = 0; i < messages.size(); i++) {
         G2 term = pfc->mult(apk.Y_agg[i], messages[i]);
@@ -78,5 +82,9 @@ bool verifySignature(const AggregatedPK& apk, const SigShare& aggregated_sig, co
     GT lhs = pfc->pairing(G2_gen, aggregated_sig.S);  // e(G2, S_agg) <=> e(S_agg, G2_gen)
     GT rhs = pfc->pairing(right_pub, aggregated_sig.h); // e(right_pub, h) <=> e(h, right_pub)
     
+    auto end_time = std::chrono::high_resolution_clock::now();
+    double duration = std::chrono::duration<double, std::milli>(end_time - start_time).count();
+    std::cout << "[Time] verifySignature execution time: " << duration << " ms" << std::endl;
+
     return lhs == rhs;
 }

@@ -1,4 +1,6 @@
 #include "trusted_authority.h"
+#include <chrono>
+#include <iostream>
 
 // --- 生成TA密钥对 ---
 TAKeyPair generateTAKeyPair(int num_messages, PFC* pfc, const G1& G1_gen) {
@@ -72,6 +74,8 @@ RandomizedCredential randomizeCredential(const AggregatedPK& apk, const TASignat
 
 // --- 第三方验证过程 ---
 bool verifyRandomizedCredential(const TAPublicKey& ta_pk, const RandomizedCredential& cred, PFC* pfc, const G1& G1_gen) {
+    auto start_time = std::chrono::high_resolution_clock::now();
+
     // 验证者检查双线性配对等式是否成立:
     // e(g, S') = e(X, R') * e(Y_x, apk'_x) * \prod e(Y_i, apk'_i)
     
@@ -90,5 +94,9 @@ bool verifyRandomizedCredential(const TAPublicKey& ta_pk, const RandomizedCreden
         rhs = rhs * pfc->pairing(cred.apk_Y_prime[i], ta_pk.Y[i]);
     }
     
+    auto end_time = std::chrono::high_resolution_clock::now();
+    double duration = std::chrono::duration<double, std::milli>(end_time - start_time).count();
+    std::cout << "[Time] verifyRandomizedCredential execution time: " << duration << " ms" << std::endl;
+
     return lhs == rhs;
 }

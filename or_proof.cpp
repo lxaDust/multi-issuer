@@ -1,4 +1,6 @@
 #include "or_proof.h"
+#include <chrono>
+#include <iostream>
 
 // --- 计算 apk_{\Sigma} = apk_x * \prod (apk_i)^{m_i} ---
 G2 computeApkSigma(const AggregatedPK& apk, const vector<Big>& m, PFC* pfc) {
@@ -36,6 +38,8 @@ PresentationPayload generatePresentationPayload(
     const G1& g, 
     const G2& g_tilde
 ) {
+    auto start_time = std::chrono::high_resolution_clock::now();
+
     PresentationPayload payload;
     payload.pk_U = pk_U;
     payload.pk_V = pk_V;
@@ -86,11 +90,18 @@ PresentationPayload generatePresentationPayload(
     proof.z_s = pfc->mult(payload.cred.s_prime, neg_c_left) + g_rs;
     
     payload.proof = proof;
+
+    auto end_time = std::chrono::high_resolution_clock::now();
+    double duration = std::chrono::duration<double, std::milli>(end_time - start_time).count();
+    std::cout << "[Time] generatePresentationPayload execution time: " << duration << " ms" << std::endl;
+
     return payload;
 }
 
 // --- 验证方检查数据包 ---
 bool verifyORProof(const PresentationPayload& payload, PFC* pfc, const G1& g, const G2& g_tilde) {
+    auto start_time = std::chrono::high_resolution_clock::now();
+
     const ORProof& proof = payload.proof;
     
     // 1. 挑战完整性：计算全局挑战 c_total
@@ -109,6 +120,9 @@ bool verifyORProof(const PresentationPayload& payload, PFC* pfc, const G1& g, co
     
     if (computed_c_left != proof.c_left) {
         cout << "  -> [Debug] Challenge split check passed: " << (computed_c_left == proof.c_left) << endl;
+        auto end_time = std::chrono::high_resolution_clock::now();
+        double duration = std::chrono::duration<double, std::milli>(end_time - start_time).count();
+        std::cout << "[Time] verifyORProof execution time: " << duration << " ms" << std::endl;
         return false;
     }
     
@@ -117,6 +131,9 @@ bool verifyORProof(const PresentationPayload& payload, PFC* pfc, const G1& g, co
     G2 rhs2_right = proof.T_right + pfc->mult(payload.pk_V, proof.c_right);
     if (!(rhs2_left == rhs2_right)) {
         cout << "  -> [Debug] Right side check passed: " << (rhs2_left == rhs2_right) << endl;
+        auto end_time = std::chrono::high_resolution_clock::now();
+        double duration = std::chrono::duration<double, std::milli>(end_time - start_time).count();
+        std::cout << "[Time] verifyORProof execution time: " << duration << " ms" << std::endl;
         return false;
     }
     
@@ -129,9 +146,16 @@ bool verifyORProof(const PresentationPayload& payload, PFC* pfc, const G1& g, co
     
     if (!(lhs_total == proof.T_left)) {
         cout << "  -> [Debug] Left side check passed: " << (lhs_total == proof.T_left) << endl;
+        auto end_time = std::chrono::high_resolution_clock::now();
+        double duration = std::chrono::duration<double, std::milli>(end_time - start_time).count();
+        std::cout << "[Time] verifyORProof execution time: " << duration << " ms" << std::endl;
         return false;
     }
     
+    auto end_time = std::chrono::high_resolution_clock::now();
+    double duration = std::chrono::duration<double, std::milli>(end_time - start_time).count();
+    std::cout << "[Time] verifyORProof execution time: " << duration << " ms" << std::endl;
+
     return true;
 }
 
@@ -144,6 +168,8 @@ PresentationPayload simulatePresentationPayloadByVerifier(
     const G1& g, 
     const G2& g_tilde
 ) {
+    auto start_time = std::chrono::high_resolution_clock::now();
+
     PresentationPayload payload;
     payload.pk_U = pk_U;
     payload.pk_V = kp_V.pk_V;
@@ -197,5 +223,10 @@ PresentationPayload simulatePresentationPayloadByVerifier(
     proof.z_right = (k_right + term) % pfc->order();
     
     payload.proof = proof;
+
+    auto end_time = std::chrono::high_resolution_clock::now();
+    double duration = std::chrono::duration<double, std::milli>(end_time - start_time).count();
+    std::cout << "[Time] simulatePresentationPayloadByVerifier execution time: " << duration << " ms" << std::endl;
+
     return payload;
 }
