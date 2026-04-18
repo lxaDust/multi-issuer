@@ -1,6 +1,8 @@
 #include "multi_issuer.h"
 #include <chrono>
 #include <iostream>
+#include "utils.h"
+#include <iostream>
 
 // --- 生成密钥对 ---
 KeyPair generateKeyPair(int num_messages, PFC* pfc, const G2& G2_gen) {
@@ -84,7 +86,8 @@ bool verifySignature(const AggregatedPK& apk, const SigShare& aggregated_sig, co
     
     auto end_time = std::chrono::high_resolution_clock::now();
     double duration = std::chrono::duration<double, std::milli>(end_time - start_time).count();
-    std::cout << "[Time] verifySignature execution time: " << duration << " ms" << std::endl;
+    std::cout << ANSI_CYAN << "[Time] verifySignature execution time: " << duration << " ms" << ANSI_RESET << std::endl;
+    g_execution_times.push_back({"verifySignature", duration});
 
     return lhs == rhs;
 }

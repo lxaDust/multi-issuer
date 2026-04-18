@@ -1,6 +1,8 @@
 #include "or_proof.h"
 #include <chrono>
 #include <iostream>
+#include "utils.h"
+#include <iostream>
 
 // --- 计算 apk_{\Sigma} = apk_x * \prod (apk_i)^{m_i} ---
 G2 computeApkSigma(const AggregatedPK& apk, const vector<Big>& m, PFC* pfc) {
@@ -93,7 +95,8 @@ PresentationPayload generatePresentationPayload(
 
     auto end_time = std::chrono::high_resolution_clock::now();
     double duration = std::chrono::duration<double, std::milli>(end_time - start_time).count();
-    std::cout << "[Time] generatePresentationPayload execution time: " << duration << " ms" << std::endl;
+    std::cout << ANSI_CYAN << "[Time] generatePresentationPayload execution time: " << duration << " ms" << ANSI_RESET << std::endl;
+    g_execution_times.push_back({"generatePresentationPayload", duration});
 
     return payload;
 }
@@ -122,7 +125,8 @@ bool verifyORProof(const PresentationPayload& payload, PFC* pfc, const G1& g, co
         cout << "  -> [Debug] Challenge split check passed: " << (computed_c_left == proof.c_left) << endl;
         auto end_time = std::chrono::high_resolution_clock::now();
         double duration = std::chrono::duration<double, std::milli>(end_time - start_time).count();
-        std::cout << "[Time] verifyORProof execution time: " << duration << " ms" << std::endl;
+        std::cout << ANSI_CYAN << "[Time] verifyORProof execution time: " << duration << " ms" << ANSI_RESET << std::endl;
+        g_execution_times.push_back({"verifyORProof (failed)", duration});
         return false;
     }
     
@@ -133,7 +137,8 @@ bool verifyORProof(const PresentationPayload& payload, PFC* pfc, const G1& g, co
         cout << "  -> [Debug] Right side check passed: " << (rhs2_left == rhs2_right) << endl;
         auto end_time = std::chrono::high_resolution_clock::now();
         double duration = std::chrono::duration<double, std::milli>(end_time - start_time).count();
-        std::cout << "[Time] verifyORProof execution time: " << duration << " ms" << std::endl;
+        std::cout << ANSI_CYAN << "[Time] verifyORProof execution time: " << duration << " ms" << ANSI_RESET << std::endl;
+        g_execution_times.push_back({"verifyORProof (failed)", duration});
         return false;
     }
     
@@ -148,13 +153,15 @@ bool verifyORProof(const PresentationPayload& payload, PFC* pfc, const G1& g, co
         cout << "  -> [Debug] Left side check passed: " << (lhs_total == proof.T_left) << endl;
         auto end_time = std::chrono::high_resolution_clock::now();
         double duration = std::chrono::duration<double, std::milli>(end_time - start_time).count();
-        std::cout << "[Time] verifyORProof execution time: " << duration << " ms" << std::endl;
+        std::cout << ANSI_CYAN << "[Time] verifyORProof execution time: " << duration << " ms" << ANSI_RESET << std::endl;
+        g_execution_times.push_back({"verifyORProof (failed)", duration});
         return false;
     }
     
     auto end_time = std::chrono::high_resolution_clock::now();
     double duration = std::chrono::duration<double, std::milli>(end_time - start_time).count();
-    std::cout << "[Time] verifyORProof execution time: " << duration << " ms" << std::endl;
+    std::cout << ANSI_CYAN << "[Time] verifyORProof execution time: " << duration << " ms" << ANSI_RESET << std::endl;
+    g_execution_times.push_back({"verifyORProof (success)", duration});
 
     return true;
 }
@@ -226,7 +233,8 @@ PresentationPayload simulatePresentationPayloadByVerifier(
 
     auto end_time = std::chrono::high_resolution_clock::now();
     double duration = std::chrono::duration<double, std::milli>(end_time - start_time).count();
-    std::cout << "[Time] simulatePresentationPayloadByVerifier execution time: " << duration << " ms" << std::endl;
+    std::cout << ANSI_CYAN << "[Time] simulatePresentationPayloadByVerifier execution time: " << duration << " ms" << ANSI_RESET << std::endl;
+    g_execution_times.push_back({"simulatePresentationPayloadByVerifier", duration});
 
     return payload;
 }

@@ -6,6 +6,25 @@
 #include "trusted_authority.h"
 #include "nizk_proof.h"
 #include "or_proof.h"
+#include "utils.h"
+#include <iomanip>
+
+std::vector<std::pair<std::string, double>> g_execution_times;
+
+void printSummaryTable() {
+    std::cout << "\n" << ANSI_BOLD << ANSI_CYAN << "+--------------------------------------------------------+" << ANSI_RESET << std::endl;
+    std::cout << ANSI_BOLD << ANSI_CYAN << "|                   性能统计汇总表格 (ms)                  |" << ANSI_RESET << std::endl;
+    std::cout << ANSI_BOLD << ANSI_CYAN << "+--------------------------------------------------------+" << ANSI_RESET << std::endl;
+    
+    std::cout << ANSI_BOLD << "| " << std::left << std::setw(39) << "函数名称 (Function)" << " | " << std::setw(11) << "耗时 (Time)" << " |" << ANSI_RESET << std::endl;
+    std::cout << "+--------------------------------------------------------+" << std::endl;
+    
+    for(const auto& entry : g_execution_times) {
+        std::cout << "| " << ANSI_YELLOW << std::left << std::setw(39) << entry.first << ANSI_RESET 
+                  << " | " << ANSI_GREEN << std::right << std::setw(8) << std::fixed << std::setprecision(4) << entry.second << " ms" << ANSI_RESET << " |" << std::endl;
+    }
+    std::cout << "+--------------------------------------------------------+\n" << std::endl;
+}
 
 using namespace std;
 
@@ -91,11 +110,11 @@ int main() {
         bool is_valid = verifySignature(apk, aggregated_sig, messages, G2_gen, &pfc);
         
         if (is_valid) {
-            cout << "  -> 【验证成功！】该证书是由 1个发起方 + 1个dm关联方 + " 
+            cout << ANSI_GREEN << "  -> 【验证成功！】该证书是由 1个发起方 + 1个dm关联方 + " 
                  << num_other_issuers << "个合作签发方 (共" 
-                 << (2 + num_other_issuers) << "方) 共同协作签发生成的，验证通过，合法有效。" << endl;
+                 << (2 + num_other_issuers) << "方) 共同协作签发生成的，验证通过，合法有效。" << ANSI_RESET << endl;
         } else {
-            cout << "  -> 【验证失败！】" << endl;
+            cout << ANSI_RED << "  -> 【验证失败！】" << ANSI_RESET << endl;
         }
         
         cout << "\n=== 可信第三方(TA)签名与随机化实验演示 ===" << endl;
@@ -126,19 +145,19 @@ int main() {
         cout << "\n[12] 用户校验验证者的真实身份..." << endl;
         bool nizk_valid = verifyNIZKProof(verifier_id, verifier_kp.pk_V, nizk_proof, &pfc, G2_gen);
         if (nizk_valid) {
-            cout << "  -> 【验证者 NIZK 校验成功！】用户确认对方是真实的 " << verifier_id << "，拥有对应的私钥。" << endl;
+            cout << ANSI_GREEN << "  -> 【验证者 NIZK 校验成功！】用户确认对方是真实的 " << verifier_id << "，拥有对应的私钥。" << ANSI_RESET << endl;
             cout << "  -> 用户同意将盲化后的证书出示给该验证者..." << endl;
         } else {
-            cout << "  -> 【验证者 NIZK 校验失败！】用户拒绝出示凭证！" << endl;
+            cout << ANSI_RED << "  -> 【验证者 NIZK 校验失败！】用户拒绝出示凭证！" << ANSI_RESET << endl;
             return -1; // 终止执行
         }
 
         cout << "\n[13] 第三方验证者验证盲化后的TA凭证..." << endl;
         bool ta_verify_valid = verifyRandomizedCredential(ta_kp.pk, rand_cred, &pfc, G1_gen);
         if (ta_verify_valid) {
-            cout << "  -> 【TA签名盲化验证成功！】验证者仅通过一次验证等式，确定了凭证来自合法的TA并属于合法用户。" << endl;
+            cout << ANSI_GREEN << "  -> 【TA签名盲化验证成功！】验证者仅通过一次验证等式，确定了凭证来自合法的TA并属于合法用户。" << ANSI_RESET << endl;
         } else {
-            cout << "  -> 【TA签名盲化验证失败！】" << endl;
+            cout << ANSI_RED << "  -> 【TA签名盲化验证失败！】" << ANSI_RESET << endl;
         }
         
         cout << "\n=== 第三阶段：匿名出示与 OR-Proof ===" << endl;
@@ -156,10 +175,10 @@ int main() {
         cout << "\n[16] 验证者验证 OR-Proof 及盲化凭证..." << endl;
         bool or_proof_valid = verifyORProof(or_payload, &pfc, G1_gen, G2_gen);
         if (or_proof_valid) {
-            cout << "  -> 【OR-Proof 验证成功！】验证者确认了哈希分割一致、Right侧合规且Left侧配对无误。" << endl;
-            cout << "  -> 整个协议执行圆满成功！" << endl;
+            cout << ANSI_GREEN << "  -> 【OR-Proof 验证成功！】验证者确认了哈希分割一致、Right侧合规且Left侧配对无误。" << ANSI_RESET << endl;
+            cout << ANSI_GREEN << "  -> 整个协议执行圆满成功！" << ANSI_RESET << endl;
         } else {
-            cout << "  -> 【OR-Proof 验证失败！】存在数据篡改或对应不符合的情况。" << endl;
+            cout << ANSI_RED << "  -> 【OR-Proof 验证失败！】存在数据篡改或对应不符合的情况。" << ANSI_RESET << endl;
         }
         
         cout << "\n=== 第四阶段：验证者展示可否认性 (伪造 OR-Proof) ===" << endl;
@@ -171,12 +190,13 @@ int main() {
         cout << "\n[18] 第三方 (如法官) 验证该伪造的大礼包..." << endl;
         bool fake_proof_valid = verifyORProof(faked_payload, &pfc, G1_gen, G2_gen);
         if (fake_proof_valid) {
-            cout << "  -> 【伪造证明验证成功！】" << endl;
+            cout << ANSI_GREEN << "  -> 【伪造证明验证成功！】" << endl;
             cout << "     因为验证者完全有能力毫无破绽地伪造出合法的展示记录，第三方无法确信该记录究竟是用户出示的，还是验证者自己捏造的。" << endl;
-            cout << "     这赋予了用户绝对的【可否认性】！" << endl;
+            cout << "     这赋予了用户绝对的【可否认性】！" << ANSI_RESET << endl;
         } else {
-            cout << "  -> 【伪造证明验证失败！】代码实现有误。" << endl;
+            cout << ANSI_RED << "  -> 【伪造证明验证失败！】代码实现有误。" << ANSI_RESET << endl;
         }
+        printSummaryTable();
     }
     
     return 0;
